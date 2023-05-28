@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <style>
+        h1{
+            font-size: 50px;
+        }
+        *{
+            font-size: 20px;
+            text-align: center;
+        }
+        body{
+            background-color: #333;
+            color: #fff;
+        }
+        h1{
+            text-align: center;
+        }
+        input{
+            width: 100px;
+            height: 30px;
+            border-radius: 5px;
+            border: none;
+            margin: 5px;
+            padding: 5px;
+        }
+        button{
+            width: 100px;
+            height: 30px;
+            border-radius: 5px;
+            border: none;
+            margin: 5px;
+            padding: 5px;
+            background-color: #fff;
+            color: #333;
+            cursor: pointer;
+        }
+        textarea{
+            width: auto;
+            height: 118px;
+            border-radius: 5px;
+            border: none;
+            margin: 5px;
+            padding: 5px;
+            font-size: 95px;
+            margin-top: 50px;
+        }
+        .grup{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        footer{
+            margin-top: 50px;
+            color: red;
+            /* ekranın altında dursun */
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- <p>Socket io fast api testi</p> -->
+
+    <h1>Clicker Game</h1>
+    <button id="backup" style="width: auto;">Kaydı Geri Yükle</button>
+    <button id="kayıt" style="width: auto;">Kaydet</button>
+    <input type="text" name="para" id="para" value="0" disabled>
+    <button id="topla" >+</button>
+
+    <textarea id="sonuc" cols="30" rows="10"></textarea>
+    <div class="grup">
+        <button id="yukseltme1" style="width: auto;">saniyede +1TL</button>
+        <p>50TL karşılığında verilir. Sayı 300 e gelince çalışması durur</p>
+    </div>
+    <div class="grup">
+        <button id="yukseltme2" style="width: auto;">saniyede +10TL</button>
+        <p>500TL karşılığında verilir. Sayı 1000 e gelince çalışması durur</p>
+    </div>
+
+    <footer>
+        <p>Not: Clicker oyunu yapmaya çalıştım.<br>Oyunun amacı: (+) butonuna basarak para biriktirmek daha sonra bu para ile yükseltmeler alarak daha kolay para kazanmak.<br>Oyunda Kazandığınız parayı kaydetme ve kayıttan geri yükleme özelliği bulunuyor. (veritabanı bağlantısı gerektirmez.)</p>
+    </footer>
+
+
+
+
+</body>
+<script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+<script >
+    $( document ).ready(function() {
+        console.log( "ready!" );
+        
+
+        const socket = io("http://localhost:8081",{transports: ["websocket", "polling", "flashsocket"] ,path:"/ws/socket.io"});
+        // "+" butonuna basıldığında para değişkenini 1 arttıran kodu dinler
+        socket.on("toplam",data=> { 
+                console.log(data); 
+                $("#sonuc").val(data+" TL");
+                $("#para").val(data+" TL");
+        });
+        // "yukseltme1" butonuna basıldığında para değişkenini her saniye 1 arttıran kodu dinler
+        socket.on("yukseltme1",data=> { 
+                console.log(data); 
+                $("#sonuc").val(data+" TL");
+                $("#para").val(data+" TL");
+                // id si yukseltme1 olan butonunu disable yap
+                // $("#yukseltme1").attr("disabled", true);
+                // $("#yukseltme1").css("background-color", "#333");
+                // $("#yukseltme1").css("color", "#fff");
+        });
+        // "yukseltme2" butonuna basıldığında para değişkenini her saniye 10 arttıran kodu dinler
+        socket.on("yukseltme2",data=> { 
+                console.log(data); 
+                $("#sonuc").val(data+" TL");
+                $("#para").val(data+" TL");
+                // id si yukseltme1 olan butonunu disable yap
+                // $("#yukseltme2").attr("disabled", true);
+                // $("#yukseltme2").css("background-color", "#333");
+                // $("#yukseltme2").css("color", "#fff");
+        });
+
+        // "backup" butonuna basıldığında pythondan gelen veriyi dinler
+        socket.on("backup",data=> { 
+                console.log(data); 
+                $("#sonuc").val(data);
+                $("#para").val(data);
+        });
+
+
+        
+        // "+" butonuna basıldığında para değişkenini pythona gönderen kod
+        $("#topla").on("click",function(){
+            let sayi1 = $("#para").val();
+            sayi1 = parseInt(sayi1);
+            socket.emit("topla", sayi1);  
+        })
+        // "yukseltme1" butonuna basıldığında para değişkenini her saniye 1 arttıracak olan pythona gönderen kod
+        $("#yukseltme1").on("click",function(){
+            let sayi1 = $("#para").val();
+            sayi1 = parseInt(sayi1);
+            socket.emit("yukseltme1", sayi1);  
+        })
+        // "yukseltme2" butonuna basıldığında para değişkenini her saniye 10 arttıracak olan pythona gönderen kod
+        $("#yukseltme2").on("click",function(){
+            let sayi1 = $("#para").val();
+            sayi1 = parseInt(sayi1);
+            socket.emit("yukseltme2", sayi1);  
+        })
+
+        // "backup" butonuna basıldığında pythona backup isteği gönderen kod
+        $("#backup").on("click",function(){
+            let sayi1 = $("#para").val();
+            socket.emit("backup", sayi1);  
+        })
+        // "kayıt" butonuna basıldığında pythona kayıt isteği gönderen kod
+        $("#kayıt").on("click",function(){
+            let sayi1 = $("#para").val();
+            socket.emit("kayıt", sayi1);  
+        })
+        
+
+
+    });
+    
+  </script>  
+</html>
