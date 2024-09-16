@@ -101,7 +101,7 @@
         console.log( "ready!" );
         
 
-        const socket = io("http://localhost:8081",{transports: ["websocket", "polling", "flashsocket"] ,path:"/ws/socket.io"});
+        const socket = io("http://127.0.0.1:8081",{transports: ["websocket", "polling", "flashsocket"] ,path:"/ws/socket.io"});
         // "+" butonuna basıldığında para değişkenini 1 arttıran kodu dinler
         socket.on("toplam",data=> { 
                 console.log(data); 
